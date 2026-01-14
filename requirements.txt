@@ -1,0 +1,14 @@
+langchain
+langchain-community
+langchain-openai
+langchain-chroma
+langchain-experimental
+chromadb
+ragas
+openai
+pypdf
+tiktoken
+rank_bm25
+python-dotenv
+langgraph
+reportlab
