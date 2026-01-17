@@ -10,12 +10,17 @@ A RAG-based system to check for contradictions in research papers using LLMs.
     ```
 
 2.  Set up environment variables:
-    Copy `.env.example` to `.env` and add your OpenAI API Key.
+    Copy `.env.example` to `.env` and add your API Keys.
     ```bash
     cp .env.example .env
     ```
+    
+    You can use either **OpenAI** or **Google Gemini**.
+    *   For OpenAI: Set `OPENAI_API_KEY`.
+    *   For Google Gemini: Set `GOOGLE_API_KEY`.
+    (I had added two called Google and Gemini key, paste your key for both of these)
 
-## Usage
+    The system will automatically detect which key is present. Delete the other
 
 ### 1. Generate Dummy Data (Optional)
 To create sample research papers for testing:

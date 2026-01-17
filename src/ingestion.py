@@ -3,6 +3,10 @@ from typing import List, Dict, Optional
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_openai import OpenAIEmbeddings
+try:
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
+except ImportError:
+    GoogleGenerativeAIEmbeddings = None
 from langchain_core.documents import Document
 
 class IngestionPipeline:
@@ -12,9 +16,21 @@ class IngestionPipeline:
         
         Args:
             embedding_model: The embedding model to use for semantic chunking.
-                             Defaults to OpenAIEmbeddings if not provided.
+                             Defaults to OpenAIEmbeddings or GoogleGenerativeAIEmbeddings based on env.
         """
-        self.embedding_model = embedding_model or OpenAIEmbeddings()
+        if embedding_model:
+            self.embedding_model = embedding_model
+        elif os.getenv("OPENAI_API_KEY"):
+            self.embedding_model = OpenAIEmbeddings()
+        elif os.getenv("GOOGLE_API_KEY"):
+            if GoogleGenerativeAIEmbeddings is None:
+                raise ImportError("langchain-google-genai is required for Google embeddings.")
+            self.embedding_model = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+        else:
+             # Fallback to OpenAI (will raise error if key missing on use) or let SemanticChunker handle it?
+             # Better to raise a clear error here if we can't determine one.
+             raise ValueError("No valid API key found for OpenAI or Google. Set OPENAI_API_KEY or GOOGLE_API_KEY.")
+
         # SemanticChunker uses the embedding model to determine breakpoints
         self.text_splitter = SemanticChunker(self.embedding_model)
 

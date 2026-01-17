@@ -2,6 +2,10 @@ import os
 from typing import List, Optional
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+try:
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
+except ImportError:
+    GoogleGenerativeAIEmbeddings = None
 from langchain_community.retrievers import BM25Retriever
 try:
     from langchain.retrievers import EnsembleRetriever
@@ -20,10 +24,21 @@ class VectorStoreManager:
         
         Args:
             persist_directory: Directory to store ChromaDB data.
-            embedding_model: Embedding model to use. Defaults to OpenAIEmbeddings.
+            embedding_model: Embedding model to use. Defaults to OpenAIEmbeddings or GoogleGenerativeAIEmbeddings based on env.
         """
         self.persist_directory = persist_directory
-        self.embedding_model = embedding_model or OpenAIEmbeddings()
+        
+        if embedding_model:
+            self.embedding_model = embedding_model
+        elif os.getenv("OPENAI_API_KEY"):
+            self.embedding_model = OpenAIEmbeddings()
+        elif os.getenv("GOOGLE_API_KEY"):
+            if GoogleGenerativeAIEmbeddings is None:
+                raise ImportError("langchain-google-genai is required for Google embeddings.")
+            self.embedding_model = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+        else:
+            raise ValueError("No valid API key found for OpenAI or Google. Set OPENAI_API_KEY or GOOGLE_API_KEY.")
+
         self.vectorstore = Chroma(
             persist_directory=self.persist_directory,
             embedding_function=self.embedding_model,

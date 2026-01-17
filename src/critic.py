@@ -1,6 +1,11 @@
+import os
 from typing import List, Dict, TypedDict, Optional
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except ImportError:
+    ChatGoogleGenerativeAI = None
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END
@@ -12,15 +17,24 @@ class AgentState(TypedDict):
     critique: str
 
 class CriticAgent:
-    def __init__(self, llm: Optional[BaseChatModel] = None, model_name: str = "gpt-4o"):
+    def __init__(self, llm: Optional[BaseChatModel] = None, model_name: str = None):
         """
         Initialize the CriticAgent.
         
         Args:
-            llm: Optional BaseChatModel instance. If None, ChatOpenAI is initialized.
-            model_name: Model name to use if initializing ChatOpenAI.
+            llm: Optional BaseChatModel instance. If None, it is initialized based on env vars.
+            model_name: Model name to use (override default).
         """
-        self.llm = llm or ChatOpenAI(model=model_name, temperature=0)
+        if llm:
+            self.llm = llm
+        elif os.getenv("OPENAI_API_KEY"):
+            self.llm = ChatOpenAI(model=model_name or "gpt-4o", temperature=0)
+        elif os.getenv("GOOGLE_API_KEY"):
+            if ChatGoogleGenerativeAI is None:
+                raise ImportError("langchain-google-genai is required for Google models.")
+            self.llm = ChatGoogleGenerativeAI(model=model_name or "gemini-2.5-flash-lite", temperature=0)
+        else:
+            raise ValueError("No valid API key found for OpenAI or Google. Set OPENAI_API_KEY or GOOGLE_API_KEY.")
         
         # Prompt for finding contradictions
         self.contradiction_prompt = ChatPromptTemplate.from_template(

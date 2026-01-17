@@ -3,12 +3,16 @@ langchain-community
 langchain-openai
 langchain-chroma
 langchain-experimental
+langchain-google-genai
 chromadb
 ragas
 openai
+google-genai
+instructor
 pypdf
 tiktoken
 rank_bm25
 python-dotenv
 langgraph
 reportlab
+streamlit

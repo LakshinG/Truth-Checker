@@ -7,3 +7,10 @@ __pycache__/
 env/
 venv/
 *.log
+
+# RAG & Database specific
+chroma_db/
+temp_pdf_storage/
+
+# Mac system files
+.DS_Store
