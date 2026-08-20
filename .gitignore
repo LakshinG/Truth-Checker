@@ -14,3 +14,10 @@ temp_pdf_storage/
 
 # Mac system files
 .DS_Store
+chroma_db/
+temp_pdf_storage/
+.env
+terraform/.terraform/
+terraform/terraform.tfstate*
+terraform/private_key*
+novakv/

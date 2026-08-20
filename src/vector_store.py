@@ -30,14 +30,9 @@ class VectorStoreManager:
         
         if embedding_model:
             self.embedding_model = embedding_model
-        elif os.getenv("OPENAI_API_KEY"):
-            self.embedding_model = OpenAIEmbeddings()
-        elif os.getenv("GOOGLE_API_KEY"):
-            if GoogleGenerativeAIEmbeddings is None:
-                raise ImportError("langchain-google-genai is required for Google embeddings.")
-            self.embedding_model = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
         else:
-            raise ValueError("No valid API key found for OpenAI or Google. Set OPENAI_API_KEY or GOOGLE_API_KEY.")
+            from langchain_community.embeddings import HuggingFaceEmbeddings
+            self.embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
         self.vectorstore = Chroma(
             persist_directory=self.persist_directory,

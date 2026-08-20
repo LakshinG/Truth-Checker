@@ -16,3 +16,6 @@ python-dotenv
 langgraph
 reportlab
 streamlit
+fastapi
+uvicorn
+sentence-transformers
