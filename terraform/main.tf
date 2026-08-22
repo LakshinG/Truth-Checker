@@ -105,11 +105,16 @@ resource "aws_instance" "web" {
               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
               add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
               apt-get update -y
-              apt-get install -y docker-ce docker-ce-cli containerd.io
+              apt-get install -y docker-ce docker-ce-cli containerd.io awscli
               usermod -aG docker ubuntu
               systemctl enable docker
               systemctl start docker
               EOF
+
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+  }
 
   tags = {
     Name = "truth-checker-server"
