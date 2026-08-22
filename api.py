@@ -57,3 +57,27 @@ async def check_truth(request: QueryRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from fastapi import File, UploadFile
+import tempfile
+import shutil
+from src.ingestion import IngestionPipeline
+
+@app.post("/upload")
+async def upload_document(file: UploadFile = File(...)):
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            shutil.copyfileobj(file.file, temp_file)
+            temp_path = temp_file.name
+        pipeline = IngestionPipeline()
+        chunks = pipeline.process_file(temp_path)
+        if vector_manager is not None:
+            vector_manager.add_documents(chunks)
+        else:
+            raise HTTPException(status_code=500, detail="Vector store not initialized")
+        os.unlink(temp_path)
+        return {"status": "success", "filename": file.filename, "chunks_added": len(chunks)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
