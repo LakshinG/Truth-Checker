@@ -6,6 +6,7 @@ provider "aws" {
 resource "aws_ecr_repository" "truth_checker_repo" {
   name                 = "truth-checker-backend"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true
